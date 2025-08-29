@@ -12,6 +12,33 @@ class MarkdownFormatter:
     
     def __init__(self):
         pass
+
+    def _improve_code_blocks(self, text: str) -> str:
+        """
+        コードブロック（```）前後に改行を追加してMarkdownビューワーでの見やすさを改善
+        
+        Args:
+            text: 処理対象のテキスト
+            
+        Returns:
+            改善されたテキスト
+        """
+        # 単純で確実なアプローチ：文字列の置換
+        result = text
+        
+        # バッククォート3つを見つけて前後に改行を追加
+        import re
+        
+        # ```の前に文字がある場合（改行以外）、改行を追加
+        result = re.sub(r'([^\n])```', r'\1\n```', result)
+        
+        # ```の後に文字がある場合（改行以外）、改行を追加  
+        result = re.sub(r'```([^\n])', r'```\n\1', result)
+        
+        # 連続する改行を整理（3個以上の連続改行を2個に）
+        result = re.sub(r'\n{3,}', r'\n\n', result)
+        
+        return result
     
     def format_conversations(self, conversations: List[Dict[str, str]], title: str = "Gemini会話") -> str:
         """
@@ -35,13 +62,15 @@ class MarkdownFormatter:
             # ユーザーの発言
             if 'user' in conversation and conversation['user']:
                 markdown_lines.append("### User")
-                markdown_lines.append(conversation['user'])
+                user_text = self._improve_code_blocks(conversation['user'])
+                markdown_lines.append(user_text)
                 markdown_lines.append("")
             
             # Geminiの応答
             if 'gemini' in conversation and conversation['gemini']:
                 markdown_lines.append("### Gemini")
-                markdown_lines.append(conversation['gemini'])
+                gemini_text = self._improve_code_blocks(conversation['gemini'])
+                markdown_lines.append(gemini_text)
                 markdown_lines.append("")
             
             markdown_lines.append("---\n")
@@ -82,12 +111,14 @@ class MarkdownFormatter:
         for conversation in conversations:
             if 'user' in conversation and conversation['user']:
                 markdown_lines.append("**User:**")
-                markdown_lines.append(conversation['user'])
+                user_text = self._improve_code_blocks(conversation['user'])
+                markdown_lines.append(user_text)
                 markdown_lines.append("")
             
             if 'gemini' in conversation and conversation['gemini']:
                 markdown_lines.append("**Gemini:**")
-                markdown_lines.append(conversation['gemini'])
+                gemini_text = self._improve_code_blocks(conversation['gemini'])
+                markdown_lines.append(gemini_text)
                 markdown_lines.append("")
             
             markdown_lines.append("---\n")

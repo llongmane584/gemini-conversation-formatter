@@ -8,6 +8,10 @@ ENV/
 env.bak/
 venv.bak/
 examples/
+converted/
+# Serena cache
+.serena/cache
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -225,3 +229,4 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
