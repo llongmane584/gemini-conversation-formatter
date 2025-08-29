@@ -63,24 +63,22 @@ python main.py "*.html" --batch --output-dir converted/
 変換されたMarkdownファイルは以下の形式になります：
 
 ```markdown
-# 会話
+# 会話 1
 
-## 質問 1
-
-### User
+## User
 ユーザーの質問
 
-### Gemini
+## Gemini
 Geminiの回答
 
 ---
 
-## 質問 2
+# 会話 2
 
-### User
+## User
 次のユーザーの質問
 
-### Gemini
+## Gemini
 次のGeminiの回答
 
 ---
