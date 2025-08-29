@@ -95,6 +95,28 @@ class GeminiConversationParser:
             else:
                 block.append('\n')
         
+        # 見出しタグをMarkdown形式に変換（2レベル格下げして第3レベルから開始）
+        for i in range(1, 7):  # h1からh6まで
+            for heading in element.find_all(f"h{i}"):
+                heading_text = heading.get_text().strip()
+                # 2レベル格下げ：h1→###、h2→####、最大######まで
+                markdown_level = min(i + 2, 6)
+                markdown_heading = "#" * markdown_level + f" {heading_text}"
+                heading.replace_with(f"\n{markdown_heading}\n")
+        
+        # 太字タグをMarkdown形式に変換
+        for strong_tag in element.find_all(["strong", "b"]):
+            strong_text = strong_tag.get_text()
+            strong_tag.replace_with(f"**{strong_text}**")
+        
+        # 斜体タグをMarkdown形式に変換
+        for italic_tag in element.find_all(["em", "i"]):
+            italic_text = italic_tag.get_text()
+            italic_tag.replace_with(f"*{italic_text}*")
+        
+        # リスト要素をMarkdown形式に変換
+        self._convert_lists_to_markdown(element)
+        
         # <code>タグをインラインコードに変換
         for code_tag in element.find_all("code"):
             code_content = code_tag.get_text()
@@ -117,6 +139,49 @@ class GeminiConversationParser:
         text = text.strip()
         
         return text
+    
+    def _convert_lists_to_markdown(self, element) -> None:
+        """
+        リスト要素をMarkdown形式に変換
+        
+        Args:
+            element: BeautifulSoupエレメント
+        """
+        # 順序付きリスト（ol）を処理
+        for ol in element.find_all("ol"):
+            self._convert_ordered_list(ol)
+        
+        # 順序なしリスト（ul）を処理
+        for ul in element.find_all("ul"):
+            self._convert_unordered_list(ul)
+    
+    def _convert_ordered_list(self, ol) -> None:
+        """順序付きリストをMarkdown形式に変換"""
+        items = ol.find_all("li", recursive=False)  # 直接の子要素のみ
+        markdown_items = []
+        
+        for i, li in enumerate(items, 1):
+            item_text = li.get_text().strip()
+            if item_text:
+                markdown_items.append(f"{i}. {item_text}")
+        
+        if markdown_items:
+            markdown_list = "\n" + "\n".join(markdown_items) + "\n"
+            ol.replace_with(markdown_list)
+    
+    def _convert_unordered_list(self, ul) -> None:
+        """順序なしリストをMarkdown形式に変換"""
+        items = ul.find_all("li", recursive=False)  # 直接の子要素のみ
+        markdown_items = []
+        
+        for li in items:
+            item_text = li.get_text().strip()
+            if item_text:
+                markdown_items.append(f"- {item_text}")
+        
+        if markdown_items:
+            markdown_list = "\n" + "\n".join(markdown_items) + "\n"
+            ul.replace_with(markdown_list)
     
     def get_conversation_count(self) -> int:
         """会話数を取得"""

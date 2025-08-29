@@ -52,23 +52,23 @@ class MarkdownFormatter:
             Markdown形式の文字列
         """
         if not conversations:
-            return f"# {title}\n\n会話が見つかりませんでした。\n"
+            return "会話が見つかりませんでした。\n"
         
-        markdown_lines = [f"# {title}\n"]
+        markdown_lines = []
         
         for i, conversation in enumerate(conversations, 1):
-            markdown_lines.append(f"## 会話 {i}\n")
+            markdown_lines.append(f"# 会話 {i}\n")
             
             # ユーザーの発言
             if 'user' in conversation and conversation['user']:
-                markdown_lines.append("### User")
+                markdown_lines.append("## User")
                 user_text = self._improve_code_blocks(conversation['user'])
                 markdown_lines.append(user_text)
                 markdown_lines.append("")
             
             # Geminiの応答
             if 'gemini' in conversation and conversation['gemini']:
-                markdown_lines.append("### Gemini")
+                markdown_lines.append("## Gemini")
                 gemini_text = self._improve_code_blocks(conversation['gemini'])
                 markdown_lines.append(gemini_text)
                 markdown_lines.append("")
