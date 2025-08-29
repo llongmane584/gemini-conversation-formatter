@@ -84,6 +84,17 @@ class GeminiConversationParser:
         if not element:
             return ""
         
+        # 改行タグを明示的に改行文字に変換
+        for br in element.find_all(['br']):
+            br.replace_with('\n')
+        
+        # ブロック要素の後に改行を追加
+        for block in element.find_all(['p', 'div', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']):
+            if block.string:
+                block.string.replace_with(block.string + '\n')
+            else:
+                block.append('\n')
+        
         # <code>タグをインラインコードに変換
         for code_tag in element.find_all("code"):
             code_content = code_tag.get_text()
@@ -93,13 +104,16 @@ class GeminiConversationParser:
         for script in element(["script", "style", "svg", "path"]):
             script.decompose()
         
-        # テキストを取得してクリーンアップ
-        text = element.get_text(separator=' ', strip=True)
+        # テキストを取得（改行を保持）
+        text = element.get_text(separator='\n', strip=False)
         
-        # 余分な空白を削除
-        text = re.sub(r'\s+', ' ', text)
+        # 3行以上の連続改行を2行に制限
+        text = re.sub(r'\n{3,}', '\n\n', text)
         
-        # 先頭末尾の空白を削除
+        # 行末の空白を削除（改行は維持）
+        text = '\n'.join(line.rstrip() for line in text.split('\n'))
+        
+        # 全体の先頭末尾の空白行を削除
         text = text.strip()
         
         return text
