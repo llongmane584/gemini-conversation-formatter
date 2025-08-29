@@ -84,16 +84,28 @@ class GeminiConversationParser:
         if not element:
             return ""
         
+        # スクリプトやスタイルタグを除去
+        for script in element(["script", "style", "svg", "path"]):
+            script.decompose()
+        
         # 改行タグを明示的に改行文字に変換
         for br in element.find_all(['br']):
             br.replace_with('\n')
         
-        # ブロック要素の後に改行を追加
-        for block in element.find_all(['p', 'div', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']):
-            if block.string:
-                block.string.replace_with(block.string + '\n')
-            else:
-                block.append('\n')
+        # 太字タグをMarkdown形式に変換（ブロック要素処理の前に実行）
+        for strong_tag in element.find_all(["strong", "b"]):
+            strong_text = strong_tag.get_text()
+            strong_tag.replace_with(f"**{strong_text}**")
+        
+        # 斜体タグをMarkdown形式に変換
+        for italic_tag in element.find_all(["em", "i"]):
+            italic_text = italic_tag.get_text()
+            italic_tag.replace_with(f"*{italic_text}*")
+        
+        # <code>タグをインラインコードに変換
+        for code_tag in element.find_all("code"):
+            code_content = code_tag.get_text()
+            code_tag.replace_with(f"`{code_content}`")
         
         # 見出しタグをMarkdown形式に変換（2レベル格下げして第3レベルから開始）
         for i in range(1, 7):  # h1からh6まで
@@ -104,29 +116,17 @@ class GeminiConversationParser:
                 markdown_heading = "#" * markdown_level + f" {heading_text}"
                 heading.replace_with(f"\n{markdown_heading}\n")
         
-        # 太字タグをMarkdown形式に変換
-        for strong_tag in element.find_all(["strong", "b"]):
-            strong_text = strong_tag.get_text()
-            strong_tag.replace_with(f"**{strong_text}**")
-        
-        # 斜体タグをMarkdown形式に変換
-        for italic_tag in element.find_all(["em", "i"]):
-            italic_text = italic_tag.get_text()
-            italic_tag.replace_with(f"*{italic_text}*")
-        
         # リスト要素をMarkdown形式に変換
         self._convert_lists_to_markdown(element)
         
-        # <code>タグをインラインコードに変換
-        for code_tag in element.find_all("code"):
-            code_content = code_tag.get_text()
-            code_tag.replace_with(f"`{code_content}`")
+        # ブロック要素の後に改行を追加
+        for block in element.find_all(['p', 'div', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']):
+            if block.string:
+                block.string.replace_with(block.string + '\n')
+            else:
+                block.append('\n')
         
-        # スクリプトやスタイルタグを除去
-        for script in element(["script", "style", "svg", "path"]):
-            script.decompose()
-        
-        # テキストを取得（改行を保持）
+        # テキストを取得（改行を維持）
         text = element.get_text(separator='\n', strip=False)
         
         # 3行以上の連続改行を2行に制限

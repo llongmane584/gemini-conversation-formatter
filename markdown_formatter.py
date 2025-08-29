@@ -30,10 +30,10 @@ class MarkdownFormatter:
         import re
         
         # ```の前に文字がある場合（改行以外）、改行を追加
-        result = re.sub(r'([^\n])```', r'\1\n```', result)
+        result = re.sub(r'([^\n])(```)', r'\1\n\2', result)
         
         # ```の後に文字がある場合（改行以外）、改行を追加  
-        result = re.sub(r'```([^\n])', r'```\n\1', result)
+        result = re.sub(r'(```)([^\n])', r'\1\n\2', result)
         
         # 連続する改行を整理（3個以上の連続改行を2個に）
         result = re.sub(r'\n{3,}', r'\n\n', result)
