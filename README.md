@@ -13,7 +13,7 @@ GeminiのHTML会話エクスポートからGeminiの会話データを抽出し�
 
 ### 必要環境
 
-- Python 3.8以上
+- Python 3.12以上
 - uvパッケージマネージャー（推奨）
 
 ### セットアップ
@@ -25,7 +25,7 @@ cd gemini-conversation-formatter
 
 # 仮想環境と依存関係のセットアップ
 uv venv
-uv add beautifulsoup4
+uv sync
 ```
 
 ## 使用方法
@@ -35,20 +35,20 @@ uv add beautifulsoup4
 ```bash
 # 基本的な使用法
 source .venv/bin/activate
-python main.py examples/hair-density.html
+python main.py input.html
 
 # 出力ファイルを指定
-python main.py examples/hair-density.html output.md
+python main.py input.html output.md
 ```
 
 ### 一括処理
 
 ```bash
-# examplesフォルダのHTMLファイルを一括変換
-python main.py "examples/*.html" --batch
+# HTMLファイルを一括変換
+python main.py "*.html" --batch
 
 # 出力ディレクトリを指定
-python main.py "examples/*.html" --batch --output-dir converted/
+python main.py "*.html" --batch --output-dir converted/
 ```
 
 ### コマンドライン引数
@@ -93,10 +93,6 @@ gemini-conversation-formatter/
 ├── main.py                 # メインCLI
 ├── gemini_parser.py        # HTML解析
 ├── markdown_formatter.py   # Markdown生成
-├── examples/              # サンプルHTMLファイル
-│   ├── hair-density.html
-│   ├── umarobo.html
-│   └── x-post-filter.html
 ├── pyproject.toml         # プロジェクト設定
 ├── .venv/                 # 仮想環境
 └── README.md              # このファイル
