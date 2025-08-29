@@ -84,6 +84,11 @@ class GeminiConversationParser:
         if not element:
             return ""
         
+        # <code>タグをインラインコードに変換
+        for code_tag in element.find_all("code"):
+            code_content = code_tag.get_text()
+            code_tag.replace_with(f"`{code_content}`")
+        
         # スクリプトやスタイルタグを除去
         for script in element(["script", "style", "svg", "path"]):
             script.decompose()
